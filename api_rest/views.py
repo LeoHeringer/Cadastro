@@ -1,19 +1,21 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import User
+from django.contrib.auth.models import User
 from .serializers import UserSerializer
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 import json
 
 
 
 @api_view(['GET'])
-
+@permission_classes([AllowAny])
 def get_users(request):
 
     if request.method == 'GET':                #Verifica o site que estamos entrando
@@ -25,33 +27,11 @@ def get_users(request):
         return Response(serializer.data)        # retorna para o serializer
     
     return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET', 'PUT'])
-def get_by_nick(request, nick):
-
-    try:
-        user = User.objects.get(pk=nick)
-    except:
-        return Response(status=status.status.HTTP_404_NOT_FOUND)
     
-    if request.method == 'GET':
 
-        serializer = UserSerializer(user)
-        return  Response(serializer.data)
-    
-    if request.methos == 'PUT':
-
-        serializer = UserSerializer(user, data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    
-@api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def user_manager(request):
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_by_nick(request):
 
     if request.method == 'GET':
 
@@ -72,46 +52,53 @@ def user_manager(request):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(status=status.HTTP_400_BAD_REQUEST)   
 
-    if request.method == 'POST':
-
-        new_user = request.data
-
-        serializer = UserSerializer(data=new_user)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    if request.method == 'PUT':
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_user(request):
 
-        nickname = request.data['user_nickname']
+    new_user = request.data
+    print(new_user.get('password'))
+
+    serializer = UserSerializer(data=new_user)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+ 
+
+@api_view(['PUT'])
+@permission_classes([AllowAny])
+def update_user(request):
+
+    cliente_id = request.query_params['id-usuario']
+
+    try:
+        update_user = User.objects.filter(id=cliente_id).first()
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    update_user.is_superuser = request.data.get('is_superuser')
+    update_user.save()
+    
+    return Response(status=status.HTTP_200_OK)
+ 
+    
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def delete_user(request):
+
+        cliente_id = request.query_params['id-usuario']
 
         try:
-            updated_user = User.objects.get(pk=nickname)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        print(request.data)
-
-        serializer = UserSerializer(updated_user, data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    
-
-    if request.method == 'DELETE':
-
-        try:
-            user_to_delete = User.objects.get(pk=request.data['user_nickname'])
+            user_to_delete = User.objects.filter(id=cliente_id)
             user_to_delete.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+

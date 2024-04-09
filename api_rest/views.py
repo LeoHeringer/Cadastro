@@ -15,7 +15,7 @@ import json
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_users(request):
 
     if request.method == 'GET':                #Verifica o site que estamos entrando
@@ -30,7 +30,7 @@ def get_users(request):
     
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_by_nick(request):
 
     if request.method == 'GET':
@@ -56,7 +56,7 @@ def get_by_nick(request):
 
     
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def create_user(request):
 
     new_user = request.data
@@ -72,7 +72,7 @@ def create_user(request):
  
 
 @api_view(['PUT'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def update_user(request):
 
     cliente_id = request.query_params['id-usuario']
@@ -89,7 +89,7 @@ def update_user(request):
  
     
 @api_view(['DELETE'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def delete_user(request):
 
         cliente_id = request.query_params['id-usuario']
@@ -97,8 +97,8 @@ def delete_user(request):
         try:
             user_to_delete = User.objects.filter(id=cliente_id)
             user_to_delete.delete()
-            return Response(status=status.HTTP_202_ACCEPTED)
+            return Response(status=status.HTTP_200_OK)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 

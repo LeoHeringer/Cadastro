@@ -92,13 +92,14 @@ def update_user(request):
 @permission_classes([IsAuthenticated])
 def delete_user(request):
 
-        cliente_id = request.query_params['id-usuario']
+    cliente_id = request.query_params.get('id-usuario')
 
-        try:
-            user_to_delete = User.objects.filter(id=cliente_id)
-            user_to_delete.delete()
-            return Response({'mensagem': 'Recurso apagado com sucesso'}, status=status.HTTP_200_OK)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    try:
+        user_to_delete = User.objects.get(id=cliente_id)
+        user_to_delete.delete()
+        return Response({'mensagem': 'Recurso apagado com sucesso'}, status=status.HTTP_200_OK)
+    
+    except User.DoesNotExist:
+        return Response({'mensagem': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 

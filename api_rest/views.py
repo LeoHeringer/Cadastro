@@ -97,7 +97,7 @@ def delete_user(request):
         try:
             user_to_delete = User.objects.filter(id=cliente_id)
             user_to_delete.delete()
-            return Response(status=status.HTTP_200_OK)
+            return Response({'mensagem': 'Recurso apagado com sucesso'}, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

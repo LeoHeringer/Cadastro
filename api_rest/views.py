@@ -24,7 +24,11 @@ def get_users(request):
 
         serializer = UserSerializer(users, many=True)   #vai usar o UserSerializar para transformar os objetos de user e serializar eles
 
-        return Response(serializer.data)        # retorna para o serializer
+        if 'aplication/xml' in request.headers.get('Accept', ''):
+
+            return Response(serializer.data, content_type='application/xml')        # retorna para o serializer o xml caso ele seja aceito, retorna os dados em xml
+    
+        return Response(serializer.data)
     
     return Response(status=status.HTTP_404_NOT_FOUND)
     
@@ -42,12 +46,15 @@ def get_by_nick(request):
 
                 try:
                     user = User.objects.get(pk=user_nickname)
-                except:
+                except User.DoesNotExist:
                     return Response(status=status.HTTP_404_NOT_FOUND)
                 
                 serializer = UserSerializer(user)
                 return Response(serializer.data)
             
+            if 'application/xml' in request.headers.get('Accept', ''):
+                return Response(serializer.data, content_type='application/xml')
+                
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             
@@ -60,13 +67,16 @@ def get_by_nick(request):
 def create_user(request):
 
     new_user = request.data
-    print(new_user.get('password'))
 
     serializer = UserSerializer(data=new_user)
 
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if 'aplication/xml' in request.headers.get('Accept', ''): # verifica se 'application/xml' esta no dicionario
+            return Response(serializer.data, status=status.HTTP_201_CREATED, content_type='application/xml') 
+    
+        return Response(serializer.data, status=status.HTTP_201_CREATED) # caso não tenha achado o xml retornar json por padrão
     
     return Response(status=status.HTTP_400_BAD_REQUEST)
  
@@ -80,12 +90,15 @@ def update_user(request):
     try:
         update_user = User.objects.filter(id=cliente_id).first()
     except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({'mensagem': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
     
     update_user.is_superuser = request.data.get('is_superuser')
     update_user.save()
+
+    if 'application/xml' in request.headers.get('Accept', ''): # verifica se 'application/xml' esta no dicionario
+        return Response({'mensagem': 'Usuário atualizado com sucesso'}, status=status.HTTP_200_OK, content_type='application/xml')
     
-    return Response(status=status.HTTP_200_OK)
+    return Response({'mensagem': 'Usuário atualizado com sucesso'}, status=status.HTTP_200_OK) # caso não tenha achado o xml retornar json por padrão
  
     
 @api_view(['DELETE'])
@@ -97,9 +110,20 @@ def delete_user(request):
     try:
         user_to_delete = User.objects.get(id=cliente_id)
         user_to_delete.delete()
-        return Response({'mensagem': 'Recurso apagado com sucesso'}, status=status.HTTP_200_OK)
+
+        if 'application/xml' in request.headers.get('Accept', ''):  # verifica se 'application/xml' esta no dicionario
+            data = {'mensagem': 'Usuario apagado com sucesso'}
+            return Response(data, status=status.HTTP_200_OK, content_type='application/xml')
     
-    except User.DoesNotExist:
+        data = {'mensagem': 'Usuario apagado com sucesso'} # caso não tenha achado o xml retornar json por padrão
+        return Response(data, status=status.HTTP_200_OK)
+    
+    except User.DoesNotExist: 
+        if 'application/xml' in request.headers.get('Accept', ''):  # verifica se 'application/xml' esta no dicionario
+            data = {'mensagem': 'Usuario não encontrado'}
+            return Response(data, status=status.HTTP_200_OK, content_type='application/xml')
+            
+        data = {'mensagem': 'Usuario não encontrado'} # caso não tenha achado o xml retornar json por padrão
         return Response({'mensagem': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 

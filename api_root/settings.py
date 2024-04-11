@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'corsheaders',
+    'rest_framework_xml',
 ]
 
 REST_FRAMEWORK = {

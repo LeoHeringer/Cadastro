@@ -4,9 +4,12 @@ from django.urls import path, include
 from .import views
 
 urlpatterns = [
-    path('', views.get_users, name='get_all_users'),
-    path('user/<str:nick>', views.get_by_nick),
-    path('create-user/', views.create_user),
+    path('get-all-users-xml', views.get_users_xml),
+    path('get-all-users-json', views.get_users_json),
+    path('user-xml', views.get_by_nick_xml),
+    path('user-json', views.get_by_nick_json),
+    path('create-user-xml', views.create_user_xml),
+    path('create-user-json', views.create_user_json),
     path('update-user', views.update_user),
     path('delete-user', views.delete_user)
 ]

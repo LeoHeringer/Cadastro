@@ -49,7 +49,13 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    # 'DEFAULT_PARSER_CLASSES': [ 
+    #     'rest_framework_xml.parsers.XMLParser', 
+    # ], 
+    # 'DEFAULT_RENDERER_CLASSES': [ 
+    #     'rest_framework_xml.renderers.XMLRenderer', 
+    # ], 
 }
 
 SIMPLE_JWT = {

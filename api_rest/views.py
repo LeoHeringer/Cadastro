@@ -112,50 +112,90 @@ def create_user_json(request):
 @api_view(['PUT'])
 @renderer_classes([XMLRenderer])
 @permission_classes([IsAuthenticated])
-def update_user(request):
+def update_user_xml(request):
 
     cliente_id = request.query_params.get('id-usuario')
 
     if not cliente_id: 
         return Response({'message': 'dado incorreto'}, status=status.HTTP_400_BAD_REQUEST)
 
-    update_user = User.objects.filter(id=cliente_id)
+    update_user = User.objects.get(id=cliente_id)
     
     if not update_user.exists():
         return Response({'message': 'not exist'}, status=status.HTTP_404_NOT_FOUND)
-    
 
-    update_user.is_superuser = request.data.get('is_superuser')
+    is_superuser = request.data.get('is_superuser')
+
+    if is_superuser is None:
+        return Response({'message': 'dados não fornecidos'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not isinstance(is_superuser, bool):
+        return Response({'message': 'dado incorreto'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    update_user.is_superuser = is_superuser
     update_user.save()
-    
 
+    
+    return Response({'mensagem': 'Usuário atualizado com sucesso'}, status=status.HTTP_200_OK)
+ 
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_user_json(request):
+
+    cliente_id = request.query_params.get('id-usuario')
+
+    if not cliente_id: 
+        return Response({'message': 'dado incorreto'}, status=status.HTTP_400_BAD_REQUEST)
+
+    update_user = User.objects.get(id=cliente_id)
+    
+    if not update_user.exists():
+        return Response({'message': 'not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+    is_superuser = request.data.get('is_superuser')
+
+    if is_superuser is None:
+        return Response({'message': 'dados não fornecidos'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not isinstance(is_superuser, bool):
+        return Response({'message': 'dado incorreto'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    update_user.is_superuser = is_superuser
+    update_user.save()
+
+    
     return Response({'mensagem': 'Usuário atualizado com sucesso'}, status=status.HTTP_200_OK)
  
     
 @api_view(['DELETE'])
 @renderer_classes([XMLRenderer])
 @permission_classes([IsAuthenticated])
-def delete_user(request):
+def delete_user_xml(request):
 
     cliente_id = request.query_params.get('id-usuario')
 
-    try:
-        user_to_delete = User.objects.get(id=cliente_id)
-        user_to_delete.delete()
+    user_to_delete = User.objects.filter(id=cliente_id).first()
 
-        if 'application/xml' in request.headers.get('Accept', ''):  # verifica se 'application/xml' esta no dicionario
-            data = {'mensagem': 'Usuario apagado com sucesso'}
-            return Response(data, status=status.HTTP_200_OK, content_type='application/xml')
-    
-        data = {'mensagem': 'Usuario apagado com sucesso'} # caso não tenha achado o xml retornar json por padrão
-        return Response(data, status=status.HTTP_200_OK)
-    
-    except User.DoesNotExist: 
-        if 'application/xml' in request.headers.get('Accept', ''):  # verifica se 'application/xml' esta no dicionario
-            data = {'mensagem': 'Usuario não encontrado'}
-            return Response(data, status=status.HTTP_200_OK, content_type='application/xml')
-            
-        data = {'mensagem': 'Usuario não encontrado'} # caso não tenha achado o xml retornar json por padrão
-        return Response({'mensagem': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+    if user_to_delete:
+        user_to_delete.delete()
+        return Response({'mensagem': 'Usuário deletado com sucesso'}, status=status.HTTP_200_OK)
+
+    return Response({'message': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user_json(request):
+
+    cliente_id = request.query_params.get('id-usuario')
+
+    user_to_delete = User.objects.filter(id=cliente_id).first()
+
+    if user_to_delete:
+        user_to_delete.delete()
+        return Response({'mensagem': 'Usuário deletado com sucesso'}, status=status.HTTP_200_OK)
+
+    return Response({'message': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 
 

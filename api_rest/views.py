@@ -119,9 +119,9 @@ def update_user_xml(request):
     if not cliente_id: 
         return Response({'message': 'dado incorreto'}, status=status.HTTP_400_BAD_REQUEST)
 
-    update_user = User.objects.get(id=cliente_id)
+    update_user = User.objects.filter(id=cliente_id).first()
     
-    if not update_user.exists():
+    if not update_user:
         return Response({'message': 'not exist'}, status=status.HTTP_404_NOT_FOUND)
 
     is_superuser = request.data.get('is_superuser')
@@ -148,9 +148,9 @@ def update_user_json(request):
     if not cliente_id: 
         return Response({'message': 'dado incorreto'}, status=status.HTTP_400_BAD_REQUEST)
 
-    update_user = User.objects.get(id=cliente_id)
+    update_user = User.objects.filter(id=cliente_id).first()
     
-    if not update_user.exists():
+    if not update_user:
         return Response({'message': 'not exist'}, status=status.HTTP_404_NOT_FOUND)
 
     is_superuser = request.data.get('is_superuser')
@@ -182,6 +182,7 @@ def delete_user_xml(request):
         return Response({'mensagem': 'Usuário deletado com sucesso'}, status=status.HTTP_200_OK)
 
     return Response({'message': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])

@@ -20,9 +20,9 @@ import json
 @renderer_classes([XMLRenderer])
 def get_users_xml(request):
 
-    users = User.objects             #irá buscar todos os objetos do banco de dados
+    users = User.objects    
 
-    serializer = UserSerializer(users, many=True)   #vai usar o UserSerializar para transformar os objetos de user e serializar eles
+    serializer = UserSerializer(users, many=True) 
     
     return Response(serializer.data, status=status.HTTP_200_OK)
 
